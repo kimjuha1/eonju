@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>핑계의 정석 - 상황별 맞춤 변명 생성기</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f0fdf4;
+            --board-inner: #2d5a44;
+            --frame-color: #e2b170;
+            --chalk-yellow: #fde047;
+            --chalk-white: #ffffff;
+            --paper-bg: #fffdf5;
+            --text-dark: #2d3748;
+            --text-sub: #a7f3d0;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px 12px;
+            font-family: 'Gowun Dodum', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 540px;
+            background-color: var(--board-inner);
+            border: 10px solid var(--frame-color);
+            border-radius: 20px;
+            padding: 30px 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            box-sizing: border-box;
+            position: relative;
+            color: var(--chalk-white);
+        }
+
+        .deco-item {
+            position: absolute;
+            user-select: none;
+            z-index: 10;
+        }
+
+        .deco-desk { top: -24px; left: 12px; font-size: 2.2rem; }
+        .deco-book { top: -26px; right: 16px; font-size: 2.3rem; }
+
+        .screen {
+            display: none;
+            text-align: center;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1 {
+            font-family: 'Gaegu', cursive;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-top: 5px;
+            margin-bottom: 4px;
+            color: var(--chalk-yellow);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-sub);
+            margin-bottom: 25px;
+            word-break: keep-all;
+        }
+
+        h2 {
+            font-family: 'Gaegu', cursive;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--chalk-yellow);
+            margin-bottom: 12px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            margin: 28px 0;
+        }
+
+        input[type="text"] {
+            width: 85%;
+            padding: 10px 14px;
+            font-size: 1.35rem;
+            font-family: 'Gaegu', cursive;
+            font-weight: 700;
+            border: none;
+            border-bottom: 2px dashed var(--chalk-white);
+            background: transparent;
+            color: var(--chalk-yellow);
+            text-align: center;
+            outline: none;
+        }
+
+        input[type="text"]::placeholder {
+            color: #a7f3d0;
+            font-size: 1.25rem;
+            font-family: 'Gaegu', cursive;
+            font-weight: 400;
+            opacity: 0.85;
+        }
+
+        .btn {
+            background-color: var(--chalk-yellow);
+            color: #1e3a8a;
+            font-family: 'Gaegu', cursive;
+            border: none;
+            padding: 8px 24px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            border-radius: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #ca8a04;
+            transition: all 0.1s ease;
+            margin: 6px 4px;
+            width: 90%;
+        }
+
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #ca8a04;
+        }
+
+        .btn-secondary {
+            background-color: var(--chalk-white);
+            color: var(--text-dark);
+            box-shadow: 0 4px 0 #94a3b8;
+        }
+
+        .btn-secondary:active {
+            box-shadow: 0 1px 0 #94a3b8;
+        }
+
+        .result-card {
+            background-color: var(--paper-bg);
+            color: var(--text-dark);
+            padding: 16px 18px;
+            margin: 14px 0;
+            border-radius: 14px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+            text-align: left;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            word-break: keep-all;
+        }
+
+        .result-card.selected {
+            border-color: #f59e0b;
+            background-color: #ffffff;
+            box-shadow: 0 0 12px rgba(251, 191, 36, 0.5);
+        }
+
+        .result-card .card-tag {
+            display: inline-block;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #b45309;
+            background: #fef3c7;
+            padding: 2px 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .result-card .card-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #2d3748;
+        }
+
+        .result-card .vote-section {
+            display: none;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed #cbd5e1;
+            text-align: center;
+        }
+
+        .result-card.selected .vote-section {
+            display: block;
+        }
+
+        .vote-btn {
+            font-family: inherit;
+            font-size: 0.95rem;
+            padding: 5px 14px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            cursor: pointer;
+            margin: 0 4px;
+        }
+
+        .board-list {
+            max-height: 220px;
+            overflow-y: auto;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 10px 14px;
+            border-radius: 12px;
+            margin-top: 14px;
+        }
+
+        .board-item {
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.2);
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            word-break: keep-all;
+        }
+
+        .board-item:last-child {
+            border-bottom: none;
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: var(--text-sub);
+            padding: 20px 0;
+            font-size: 1.05rem;
+        }
+
+        .step-indicator {
+            font-size: 1.05rem;
+            color: #fca5a5;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="deco-item deco-desk">🏫</div>
+    <div class="deco-item deco-book">✏️</div>
+
+    <div id="screen-home" class="screen active">
+        <h1>🔔 핑계의 정석</h1>
+        <div class="subtitle">학교 & 일상 맞춤 변명 노트</div>
+        <p>등교 지각, 과제 미제출 등 곤란한 상황에서<br>자연스럽게 말할 수 있는 핑계를 만들어 드려요.</p>
+        <br>
+        <button class="btn" onclick="nextScreen('screen-step1')">핑계 작성하기 ✏️</button>
+    </div>
+
+    <div id="screen-step1" class="screen">
+        <div class="step-indicator">1단계 / 3단계</div>
+        <h2>어떤 실수를 하셨나요?</h2>
+        <div class="input-group">
+            <input type="text" id="input-fault" placeholder="예: 지각해버림, 숙제 두고옴, 깜빡함..." onkeypress="handleKeyPress(event, 'input-fault', 'screen-step2')">
+        </div>
+        <button class="btn" onclick="validateAndNext('input-fault', 'screen-step2')">다음 단계 ➡️</button>
+    </div>
+
+    <div id="screen-step2" class="screen">
+        <div class="step-indicator">2단계 / 3단계</div>
+        <h2>문제가 생긴 장소는 어디인가요?</h2>
+        <div class="input-group">
+            <input type="text" id="input-place" placeholder="예: 약속가는길, 도산공원, 이불 속..." onkeypress="handleKeyPress(event, 'input-place', 'screen-step3')">
+        </div>
+        <button class="btn" onclick="validateAndNext('input-place', 'screen-step3')">다음 단계 ➡️</button>
+    </div>
+
+    <div id="screen-step3" class="screen">
+        <div class="step-indicator">3단계 / 3단계</div>
+        <h2>핑계를 댈 상대는 누구인가요?</h2>
+        <div class="input-group">
+            <input type="text" id="input-target" placeholder="예: 베프 김땡구, 담임선생님, 교수님..." onkeypress="handleKeyPressForSubmit(event)">
+        </div>
+        <button class="btn" onclick="generateExcuses()">핑계 만들기 🔍</button>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <h2>💡 추천 핑계 노트</h2>
+        <p style="font-size: 1rem; color: var(--text-sub); margin-top:-6px;">가장 자연스러운 핑계를 하나 골라보세요.</p>
+        
+        <div id="excuse-list"></div>
+
+        <button class="btn btn-secondary" id="btn-share" onclick="shareExcuse()" style="display:none;">📋 선택한 핑계 복사하기</button>
+        <button class="btn" onclick="nextScreen('screen-board')">🏆 핑계 랭킹 게시판</button>
+    </div>
+
+    <div id="screen-board" class="screen">
+        <h2>🏫 실시간 핑계 게시판</h2>
+        <p style="font-size: 1rem;">실제 통했던 변명 모음집</p>
+        
+        <div class="board-list" id="community-board"></div>
+
+        <br>
+        <button class="btn" onclick="restart()">처음으로 돌아가기 🔄</button>
+    </div>
+</div>
+
+<script>
+    let faultData = "";
+    let placeData = "";
+    let targetData = "";
+    let selectedExcuseIndex = null;
+    let generatedExcuses = [];
+
+    let communityData = JSON.parse(localStorage.getItem('excuse_board_data')) || [];
+
+    function nextScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function handleKeyPress(e, inputId, nextScreenId) {
+        if (e.key === 'Enter') {
+            validateAndNext(inputId, nextScreenId);
+        }
+    }
+
+    function handleKeyPressForSubmit(e) {
+        if (e.key === 'Enter') {
+            generateExcuses();
+        }
+    }
+
+    function validateAndNext(inputId, nextScreenId) {
+        const val = document.getElementById(inputId).value.trim();
+        if(!val) {
+            alert("내용을 입력해 주세요!");
+            return;
+        }
+        
+        if(inputId === 'input-fault') faultData = val;
+        if(inputId === 'input-place') placeData = val;
+        if(inputId === 'input-target') targetData = val;
+
+        nextScreen(nextScreenId);
+    }
+
+    // 반말/존댓말 구분
+    function isInformalTarget(target) {
+        const formalKeywords = ['선생님', '교수님', '어머니', '아버지', '팀장님', '부장님', '사장님'];
+        if (formalKeywords.some(k => target.includes(k))) {
+            return false;
+        }
+        return true;
+    }
+
+    // "베프 김땡구" -> "땡구야" 처리 함수
+    function formatTargetTitle(target, isInformal) {
+        let clean = target.trim();
+
+        if (isInformal) {
+            clean = clean.replace(/^(베프|내\s*베프|친한\s*친구|친구)\s*/g, '');
+
+            if (/^[가-힣]{3,}$/.test(clean)) {
+                clean = clean.substring(1);
+            }
+
+            if (clean.endsWith('아') || clean.endsWith('야')) {
+                return clean;
+            }
+
+            const lastChar = clean.charCodeAt(clean.length - 1);
+            const hasBatchim = (lastChar - 0xAC00) % 28 !== 0;
+
+            return clean + (hasBatchim ? '아' : '야');
+        } else {
+            if (clean.endsWith('님')) return clean;
+            return clean + '님';
+        }
+    }
+
+    function generateExcuses() {
+        targetData = document.getElementById('input-target').value.trim();
+        if(!targetData) {
+            alert("상대를 입력해 주세요!");
+            return;
+        }
+
+        selectedExcuseIndex = null;
+        document.getElementById('btn-share').style.display = 'none';
+
+        const isInformal = isInformalTarget(targetData);
+        const targetTitle = formatTargetTitle(targetData, isInformal);
+        
+        // 입력받은 장소를 조사 없이 그대로 사용
+        const place = placeData.trim();
+
+        let isBed = ['이불', '침대', '방'].some(k => place.includes(k));
+        let isTransit = ['버스', '정류장', '지하철', '길', '도로', '공원'].some(k => place.includes(k));
+
+        if (isInformal) {
+            if (isBed) {
+                generatedExcuses = [
+                    {
+                        type: "갑작스런 컨디션 난조형",
+                        text: `${targetTitle}, 진짜 미안해! 아침에 눈떴을 때 ${place} 갑자기 오한에 머리가 너무 아파서 바로 못 일어나고 누워있느라 ${faultData} 하게 됐어.`
+                    },
+                    {
+                        type: "배터리 / 알람 먹통형",
+                        text: `${targetTitle}, 밤새 핸드폰 충전기 단자가 헐거워져서 꺼져있는 바람에 알람을 못 들었어... ${place} 눈뜨자마자 확인하고 놀라서 바로 연락해!`
+                    },
+                    {
+                        type: "급성 복통 / 응급 상황형",
+                        text: `미안해 ${targetTitle}! ${place} 일어나자마자 배가 너무 아파서 화장실 왔다갔다 하느라 정신이 없었어. 지금 빨리 수습하고 연락해!`
+                    }
+                ];
+            } else if (isTransit) {
+                generatedExcuses = [
+                    {
+                        type: "대중교통 / 도로 지연형",
+                        text: `${targetTitle}, 내가 ${place} 시간 맞춰 가고 있었는데 하필 차가 너무 막히고 사람이 몰려서 ${faultData} 하게 됐어. 미안!`
+                    },
+                    {
+                        type: "소지품 분실 / 긴급 확인형",
+                        text: `${targetTitle}, ${place} 지갑이랑 챙겨야 할 물건이 없어진 걸 알아채서 도로 가서 찾느라 늦었어. 정말 미안해!`
+                    },
+                    {
+                        type: "돌발 상황형",
+                        text: `미안해 ${targetTitle}! ${place} 사고라도 났는지 도로가 완전히 막혀서 차가 꼼짝을 안 해. 예상보다 늦어지고 있어.`
+                    }
+                ];
+            } else {
+                generatedExcuses = [
+                    {
+                        type: "갑작스러운 몸살 / 병원 방문형",
+                        text: `${targetTitle}, ${place} 출발하려는데 갑자기 급체 기운이 심해서 근처 약국 들러서 약 사먹고 오느라 ${faultData} 하게 됐어. 너무 미안해!`
+                    },
+                    {
+                        type: "현관 도어락 / 고장형",
+                        text: `${targetTitle}, 진짜 황당하게 ${place} 나가려는데 도어락 건전지가 나가서 문이 안 열리더라고... 그거 해결하느라 늦었어.`
+                    },
+                    {
+                        type: "대중교통 놓침형",
+                        text: `미안해 ${targetTitle}, ${place} 이동하는 길에 바로 앞에서 차를 놓쳤는데 다음 차가 한참 뒤에 와서 완전히 꼬였어.`
+                    }
+                ];
+            }
+        } else {
+            if (isBed) {
+                generatedExcuses = [
+                    {
+                        type: "급성 오한 / 컨디션 난조형",
+                        text: `${targetTitle}, 죄송합니다. 아침에 ${place} 일어나는 시점에 갑자기 몸살 기운이 심해서 안정을 취하느라 본의 아니게 ${faultData} 하게 되었습니다.`
+                    },
+                    {
+                        type: "기기 고장 / 알람 오류형",
+                        text: `${targetTitle}, 밤사이 휴대폰 충전 장애로 배터리가 꺼져있어 알람을 들지 못했습니다. ${place} 확인하자마자 연락드립니다. 정말 죄송합니다.`
+                    },
+                    {
+                        type: "급성 복통형",
+                        text: `죄송합니다 ${targetTitle}, 아침에 ${place} 갑자기 배가 너무 아파 비상약 먹고 안정을 취하느라 이동이 조금 지연되었습니다.`
+                    }
+                ];
+            } else if (isTransit) {
+                generatedExcuses = [
+                    {
+                        type: "대중교통 지연형",
+                        text: `${targetTitle}, 죄송합니다. ${place} 이용하려던 대중교통 배차가 많이 지연되고 도로 정체까지 겹쳐서 예정 시간보다 늦어지게 되었습니다.`
+                    },
+                    {
+                        type: "소지품 재확인형",
+                        text: `${targetTitle}, 이동 중 ${place} 필수 소지품을 빠뜨린 것을 확인하고 다시 돌아가서 챙겨오느라 늦어지게 되었습니다. 죄송합니다.`
+                    },
+                    {
+                        type: "돌발 도로 통제형",
+                        text: `죄송합니다 ${targetTitle}, ${place} 근처 도로 정체가 심해서 생각보다 도착이 지연되고 있습니다.`
+                    }
+                ];
+            } else {
+                generatedExcuses = [
+                    {
+                        type: "급성 통증 / 약국 방문형",
+                        text: `${targetTitle}, 죄송합니다. ${place} 출발하기 직전 급체 증상이 있어 근처 약국에서 약을 사먹고 오느라 ${faultData} 하게 되었습니다.`
+                    },
+                    {
+                        type: "집안 돌발 고장형",
+                        text: `${targetTitle}, 출발 직전 ${place} 갑작스러운 시설 고장 문제가 생겨 해결하고 오느라 시간이 지체되었습니다. 정말 죄송합니다.`
+                    },
+                    {
+                        type: "대중교통 놓침형",
+                        text: `죄송합니다 ${targetTitle}, ${place} 이동하던 중 차량을 놓치는 바람에 다음 차를 기다리느라 예상보다 늦어졌습니다.`
+                    }
+                ];
+            }
+        }
+
+        const listDiv = document.getElementById('excuse-list');
+        listDiv.innerHTML = "";
+
+        generatedExcuses.forEach((excuseObj, index) => {
+            const card = document.createElement('div');
+            card.className = 'result-card';
+            card.id = `card-${index}`;
+            card.onclick = () => selectCard(index);
+
+            card.innerHTML = `
+                <div class="card-tag">📌 ${excuseObj.type}</div>
+                <div class="card-text">"${excuseObj.text}"</div>
+                <div class="vote-section">
+                    <p style="margin:0 0 6px 0; color:var(--text-dark); font-size:0.95rem;">이 변명이 설득력 있었나요?</p>
+                    <button class="vote-btn" onclick="vote(event, ${index}, '통했다')">👍 통했다</button>
+                    <button class="vote-btn" onclick="vote(event, ${index}, '걸렸다')">👎 걸렸다</button>
+                </div>
+            `;
+            listDiv.appendChild(card);
+        });
+
+        nextScreen('screen-result');
+    }
+
+    function selectCard(index) {
+        selectedExcuseIndex = index;
+
+        document.querySelectorAll('.result-card').forEach((card, idx) => {
+            if(idx === index) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        });
+
+        document.getElementById('btn-share').style.display = 'block';
+    }
+
+    function vote(event, index, resultType) {
+        event.stopPropagation();
+
+        const card = document.getElementById(`card-${index}`);
+        const voteSection = card.querySelector('.vote-section');
+        const currentExcuseText = `[${faultData} / ${placeData} / ${targetData}] ${generatedExcuses[index].text}`;
+
+        if(resultType === '통했다') {
+            voteSection.innerHTML = `<p style="color:#16a34a; font-weight:bold; margin:0; font-size:0.95rem;">👍 "통했다"로 기록되었습니다.</p>`;
+            communityData.unshift({ text: currentExcuseText, success: 1, fail: 0 });
+        } else {
+            voteSection.innerHTML = `<p style="color:#dc2626; font-weight:bold; margin:0; font-size:0.95rem;">👎 "걸렸다"로 기록되었습니다.</p>`;
+            communityData.unshift({ text: currentExcuseText, success: 0, fail: 1 });
+        }
+
+        localStorage.setItem('excuse_board_data', JSON.stringify(communityData));
+        renderBoard();
+    }
+
+    function shareExcuse() {
+        if(selectedExcuseIndex === null) {
+            alert("복사할 핑계를 선택해 주세요!");
+            return;
+        }
+
+        const chosen = generatedExcuses[selectedExcuseIndex];
+        const textToShare = `[핑계의 정석]\n- 상황: ${faultData}\n- 대상: ${targetData}\n- 변명: "${chosen.text}"`;
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textToShare).then(() => {
+                alert("선택한 핑계가 클립보드에 복사되었습니다!");
+            }).catch(() => {
+                alert("복사에 실패했습니다.");
+            });
+        } else {
+            const textarea = document.createElement("textarea");
+            textarea.value = textToShare;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            alert("선택한 핑계가 클립보드에 복사되었습니다!");
+        }
+    }
+
+    function renderBoard() {
+        const boardDiv = document.getElementById('community-board');
+        boardDiv.innerHTML = "";
+        
+        if (communityData.length === 0) {
+            boardDiv.innerHTML = `<div class="empty-msg">아직 기록된 핑계가 없어요.<br>직접 핑계를 만들고 투표해 보세요! ✏️</div>`;
+            return;
+        }
+
+        communityData.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'board-item';
+            row.innerHTML = `
+                <span style="padding-right: 10px;">${item.text}</span>
+                <span style="min-width: 75px; text-align: right; font-size:0.85rem;">⭕ ${item.success} &nbsp;❌ ${item.fail}</span>
+            `;
+            boardDiv.appendChild(row);
+        });
+    }
+
+    function restart() {
+        document.getElementById('input-fault').value = "";
+        document.getElementById('input-place').value = "";
+        document.getElementById('input-target').value = "";
+        nextScreen('screen-home');
+    }
+
+    renderBoard();
+</script>
+</body>
+</html>
